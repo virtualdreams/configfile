@@ -13,7 +13,7 @@ Text based configuration files based on key value pairs. Supporting:
 * Lines contain a `=` are treated as a key value pair.
 * Lines beginning with `#` or `;` are treated as comments, empty lines are ignored.
 * The key format must be in form of `@?[a-zA-Z_][a-zA-Z0-9_.]*`.
-* The value for *Here document* mode must be in form `>>[a-zA-Z][a-zA-Z0-9]*`.
+* The value for *Here document* mode must be in form `<<[a-zA-Z][a-zA-Z0-9]*`.
 * Leading and trailing whitespaces are ignored for keys and values.
 * Preserve leading or trailing whitespace with surrounding double quotes.
 
