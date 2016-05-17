@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>ConfigFile</id>
+        <version>1.0.0</version>
+        <title>ConfigFile</title>
+        <authors>virtualdreams</authors>
+        <owners>virtualdreams</owners>
+        <projectUrl>https://github.com/virtualdreams/ConfigFile</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>
+			Text based configuration files based on key value pairs. Support for:
+			- Singleline values
+			- Multiline values
+			- Here document mode
+			- Literal mode
+			- Events for add and change key
+		</description>
+        <tags>config, text, settings,</tags>
+    </metadata>
+    <files>
+        <file src="bin\Release\net35\ConfigFile.dll" target="lib\net35\ConfigFile.dll" />
+        <file src="bin\Release\net35\ConfigFile.xml" target="lib\net35\ConfigFile.xml" />
+        <file src="bin\Release\net40\ConfigFile.dll" target="lib\net40\ConfigFile.dll" />
+        <file src="bin\Release\net40\ConfigFile.xml" target="lib\net40\ConfigFile.xml" />
+        <file src="bin\Release\net45\ConfigFile.dll" target="lib\net45\ConfigFile.dll" />
+        <file src="bin\Release\net45\ConfigFile.xml" target="lib\net45\ConfigFile.xml" />
+        <file src="bin\Release\net451\ConfigFile.dll" target="lib\net451\ConfigFile.dll" />
+        <file src="bin\Release\net451\ConfigFile.xml" target="lib\net451\ConfigFile.xml" />
+    </files>
+</package>
