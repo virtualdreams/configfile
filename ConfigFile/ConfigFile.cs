@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ConfigFile
@@ -18,7 +15,7 @@ namespace ConfigFile
 		/// <summary>
 		/// Hold the key value pairs.
 		/// </summary>
-		protected Hashtable _configValues = new Hashtable(StringComparer.OrdinalIgnoreCase);
+		protected Dictionary<string, string> _configValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 		
 		/// <summary>
 		/// Occurs before a new key is added.
@@ -346,11 +343,11 @@ namespace ConfigFile
 		/// <typeparam name="T">Destination type.</typeparam>
 		/// <param name="key">The key of the value to get.</param>
 		/// <param name="defaultValue">The default value if key not found.</param>
-		/// <param name="valueNotEmpty">If the value is empty, then retrun the default value.</param>
+		/// <param name="defaultIfEmpty">If value is empty, then return the default value.</param>
 		/// <returns>The value from the key, otherwise the default value.</returns>
-		public T GetValue<T>(string key, T defaultValue, bool valueNotEmpty = false) where T : IConvertible
+		public T GetValue<T>(string key, T defaultValue, bool defaultIfEmpty = false) where T : IConvertible
 		{
-			return GetValue<T>(key, defaultValue, CultureInfo.InvariantCulture, valueNotEmpty);
+			return GetValue<T>(key, defaultValue, CultureInfo.InvariantCulture, defaultIfEmpty);
 		}
 
 		/// <summary>
@@ -361,17 +358,17 @@ namespace ConfigFile
 		/// <param name="key">The key of the value to get.</param>
 		/// <param name="defaultValue">The default value if key not found.</param>
 		/// <param name="provider">The format provider.</param>
-		/// <param name="valueNotEmpty">If the value is empty, then retrun the default value.</param>
+		/// <param name="defaultIfEmpty">If value is empty, then return the default value.</param>
 		/// <returns>The value from the key, otherwise the default value.</returns>
-		public T GetValue<T>(string key, T defaultValue, IFormatProvider provider, bool valueNotEmpty = false) where T : IConvertible
+		public T GetValue<T>(string key, T defaultValue, IFormatProvider provider, bool defaultIfEmpty = false) where T : IConvertible
 		{
 			if (String.IsNullOrEmpty(key))
 				throw new ArgumentNullException("key");
 
 			if (_configValues.ContainsKey(key))
 			{
-				var _value = _configValues[key] as string;
-				if (valueNotEmpty && String.IsNullOrEmpty(_value))
+				var _value = _configValues[key];
+				if (defaultIfEmpty && String.IsNullOrEmpty(_value))
 				{
 					return defaultValue;
 				}
@@ -394,11 +391,11 @@ namespace ConfigFile
 		/// </summary>
 		/// <typeparam name="T">Destination type.</typeparam>
 		/// <param name="key">The key of the value to get.</param>
-		/// <param name="valueNotEmpty">If the value is empty, then throw an exception.</param>
+		/// <param name="valueMustNotBeEmpty">If value is empty, then throw an exception.</param>
 		/// <returns>Throws an exception if the key is not found.</returns>
-		public T TryGetValue<T>(string key, bool valueNotEmpty = false) where T : IConvertible
+		public T TryGetValue<T>(string key, bool valueMustNotBeEmpty = false) where T : IConvertible
 		{
-			return TryGetValue<T>(key, CultureInfo.InvariantCulture, valueNotEmpty);
+			return TryGetValue<T>(key, CultureInfo.InvariantCulture, valueMustNotBeEmpty);
 		}
 
 		/// <summary>
@@ -408,9 +405,9 @@ namespace ConfigFile
 		/// <typeparam name="T">Destination type.</typeparam>
 		/// <param name="key">The key of the value to get.</param>
 		/// <param name="provider">The format provider.</param>
-		/// <param name="valueNotEmpty">If the value is empty, then throw an exception.</param>
+		/// <param name="valueMustNotBeEmpty">If value is empty, then throw an exception.</param>
 		/// <returns>Throws a exception if the key is not found.</returns>
-		public T TryGetValue<T>(string key, IFormatProvider provider, bool valueNotEmpty = false) where T : IConvertible
+		public T TryGetValue<T>(string key, IFormatProvider provider, bool valueMustNotBeEmpty = false) where T : IConvertible
 		{
 			if(String.IsNullOrEmpty(key))
 			{
@@ -419,8 +416,8 @@ namespace ConfigFile
 
 			if(_configValues.ContainsKey(key))
 			{
-				var _value = _configValues[key] as string;
-				if (valueNotEmpty && String.IsNullOrEmpty(_value))
+				var _value = _configValues[key];
+				if (valueMustNotBeEmpty && String.IsNullOrEmpty(_value))
 				{
 					throw new ConfigException(String.Format("The value for key '{0}' must not be empty.", key));
 				}
@@ -442,12 +439,12 @@ namespace ConfigFile
 		/// </summary>
 		/// <typeparam name="T">The destination type.</typeparam>
 		/// <param name="key">The key of the value to get.</param>
-		/// <param name="value">The value if the is found, otherwise the default value.</param>
-		/// <param name="valueNotEmpty">If the value is empty, then false is returned.</param>
+		/// <param name="value">The value if the key is found.</param>
+		/// <param name="valueMustNotBeEmpty">If value is empty, then false is returned.</param>
 		/// <returns>Returns true if the key is found, otherwise false.</returns>
-		public bool TryGetValue<T>(string key, out T value, bool valueNotEmpty = false) where T : IConvertible
+		public bool TryGetValue<T>(string key, out T value, bool valueMustNotBeEmpty = false) where T : IConvertible
 		{
-			return TryGetValue<T>(key, out value, CultureInfo.InvariantCulture, valueNotEmpty);
+			return TryGetValue<T>(key, out value, CultureInfo.InvariantCulture, valueMustNotBeEmpty);
 		}
 
 		/// <summary>
@@ -455,11 +452,11 @@ namespace ConfigFile
 		/// </summary>
 		/// <typeparam name="T">The destination type.</typeparam>
 		/// <param name="key">The key of the value to get.</param>
-		/// <param name="value">The value if the is found, otherwise the default value.</param>
+		/// <param name="value">The value if the key is found.</param>
 		/// <param name="provider">The format provider.</param>
-		/// <param name="valueNotEmpty">If the value is empty, then false is returned.</param>
+		/// <param name="valueMustNotBeEmpty">If value is empty, then false is returned.</param>
 		/// <returns>Returns true if the key is found, otherwise false.</returns>
-		public bool TryGetValue<T>(string key, out T value, IFormatProvider provider, bool valueNotEmpty = false) where T : IConvertible
+		public bool TryGetValue<T>(string key, out T value, IFormatProvider provider, bool valueMustNotBeEmpty = false) where T : IConvertible
 		{
 			value = default(T);
 
@@ -470,8 +467,8 @@ namespace ConfigFile
 
 			if (_configValues.ContainsKey(key))
 			{
-				var _value = _configValues[key] as string;
-				if (valueNotEmpty && String.IsNullOrEmpty(_value))
+				var _value = _configValues[key];
+				if (valueMustNotBeEmpty && String.IsNullOrEmpty(_value))
 				{
 					return false;
 				}
@@ -509,7 +506,7 @@ namespace ConfigFile
 		/// <returns></returns>
 		public IEnumerable<string> GetKeys()
 		{
-			return _configValues.Keys.Cast<string>();
+			return _configValues.Keys;
 		}
 
 		/// <summary>
@@ -518,7 +515,7 @@ namespace ConfigFile
 		/// <returns></returns>
 		public IEnumerable<string> GetValues()
 		{
-			return _configValues.Values.Cast<string>();
+			return _configValues.Values;
 		}
 	}
 
@@ -530,7 +527,7 @@ namespace ConfigFile
 		/// <summary>
 		/// Hold the key value pairs.
 		/// </summary>
-		protected Hashtable _configValues = new Hashtable(StringComparer.OrdinalIgnoreCase);
+		protected Dictionary<string, string> _configValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
 		/// Initialize new configuration writer.
@@ -757,48 +754,35 @@ namespace ConfigFile
 	/// <remarks>
 	/// This is the base exception for all exceptions thrown in the ConfigFile
 	/// </remarks>
-	[Serializable]
-	public class ConfigException : ApplicationException
+	public class ConfigException : Exception
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:CS.Helper.ConfigFileException" /> class.
 		/// </summary>
 		public ConfigException()
 			: base("ConfigFile caused an exception.")
-		{
-		}
+		{ }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:CS.Helper.ConfigFileException" /> class.
 		/// </summary>
 		public ConfigException(Exception ex)
 			: base("ConfigFile caused an exception.", ex)
-		{
-		}
+		{ }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:CS.Helper.ConfigFileException" /> class.
 		/// </summary>
 		public ConfigException(string message)
 			: base(message)
-		{
-		}
+		{ }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:CS.Helper.ConfigFileException" /> class.
 		/// </summary>
 		public ConfigException(string message, Exception innerException)
 			: base(message, innerException)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="T:CS.Helper.ConfigFileException" /> class.
-		/// </summary>
-		protected ConfigException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
+		{ }
 	}
 
 #if NET35

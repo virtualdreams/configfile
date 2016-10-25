@@ -36,7 +36,8 @@
 param
 (
 	[string]$file = '.\Properties\AssemblyInfo.cs',
-	[string]$git = 'C:\Program Files\git\bin\git.exe'
+	[string]$git = 'C:\Program Files\git\bin\git.exe',
+	[bool]$usefile = $false
 )
 
 ### test if the git executable exists
@@ -61,32 +62,38 @@ if(!$file -or !(Test-Path $file))
 	return
 }
 
+### Get description string
+function Get-GitDescription()
+{
+	[string]$info = git describe --long --always --dirty=-dev 2> $null
+	return $info
+}
+
 ### Get file version from AssemblyInfo.cs
 function Get-FileVersion()
 {
-	$hash = @{
+	$obj = New-Object PSObject -Property @{
 		Major = 1
 		Minor = 0
 		Revision = 0
 		Build = 0
 		Parsed = $false
 	}
-	$obj = New-Object PSObject -Property $hash
 
 	### select string from assembly file
 	$info = Select-String -Path $file -Pattern "\[assembly: AssemblyFileVersion\(""(\d+)\.(\d+)\.(\d+)\.(\d+)\""\)\]"  | % { $_.Matches } | % { $_.Value } 
 	if($info -match "\[assembly: AssemblyFileVersion\(""(\d+)\.(\d+)\.(\d+)\.(\d+)\""\)\]")
 	{
-		$major = [string]$matches[1]
-		$minor = [string]$matches[2]
-		$build = [string]$matches[3]
-		$revision = [string]$matches[4]
-		
+		$major = [int]$matches[1]
+		$minor = [int]$matches[2]
+		$build = [int]$matches[3]
+		$revision = [int]$matches[4]
 		
 		$obj.Major = $major
 		$obj.Minor = $minor
 		$obj.Revision = $revision
 		$obj.Build = $build
+		
 		$obj.Parsed = $true
 	}
 	
@@ -97,46 +104,40 @@ function Get-FileVersion()
 ### Example: v1.0-release-0-g0000000
 function Get-GitVersion()
 {
-	$hash = @{
+	$obj = New-Object PSObject -Property @{
 		Major = 1
 		Minor = 0
 		Revision = 0
 		Build = 0
 		Parsed = $false
 	}
-	$obj = New-Object PSObject -Property $hash
 	
 	### get total commit count
-	$commits = git rev-list HEAD --count
+	[int]$commits = git rev-list HEAD --count 2> $null
 
 	### get a description
-	$info = git describe --long --always --dirty=-dev
-
+	[string]$info = Get-GitDescription
+	
+	### get version number from description
 	if($info -match "^v(\d+).(\d+)-.*-(\d+)-g.*$")
 	{
-		$major = [string]$matches[1]
-		$minor = [string]$matches[2]
-		$revision = [string]$matches[3]
+		$major = [int]$matches[1]
+		$minor = [int]$matches[2]
+		$revision = [int]$matches[3]
 		
 		$obj.Major = $major
 		$obj.Minor = $minor
-		$obj.Build = $commits
 		$obj.Revision = $revision
-		$obj.Parsed = $true
 	}
+	
+	$obj.Parsed = $commits -gt 0
+	$obj.Build = $commits
 	
 	return $obj
 }
 
-### Get description string
-function Get-GitDescription()
-{
-	$info = git describe --long --always --dirty=-dev
-	return $info
-}
-
 ### Write version info to AssemblyInfo.cs
-function Write-Assembly([string]$major, [string]$minor, [string]$build, [string]$revision, [string]$description)
+function Write-Assembly([int]$major, [int]$minor, [int]$build, [int]$revision, [string]$description)
 {
 	(Get-Content $file -Encoding UTF8) `
 		-replace "^\[assembly: AssemblyVersion\("".*""\)\]", "[assembly: AssemblyVersion(""$major.0.0.0"")]" `
@@ -155,15 +156,19 @@ Write-Host "Git:          " $g
 Write-Host "Assembly:     " $a
 Write-Host "Description:  " $d
 
-if($g.Parsed -eq $True)
+if ( $usefile -eq $false -and $g.Parsed )
 {
 	Write-Host "Use from git: " $g.Major $g.Minor $g.Build $g.Revision $d
 	Write-Assembly $g.Major $g.Minor $g.Build $g.Revision $d
+	Write-Host "Version information updated."
+}
+elseif ( $a.Parsed -eq $true )
+{
+	Write-Host "Use from file:" $a.Major $a.Minor $a.Build $a.Revision ""
+	Write-Assembly $a.Major $a.Minor $a.Build $a.Revision ""
+	Write-Host "Version information updated."
 }
 else
 {
-	Write-Host "Use from file:" $a.Major $a.Minor $a.Build $a.Revision $d
-	Write-Assembly $a.Major $a.Minor $a.Build $a.Revision $d
+	Write-Host "No version information updated."
 }
-
-Write-Host "Version information updated."
