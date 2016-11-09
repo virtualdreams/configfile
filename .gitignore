@@ -3,3 +3,4 @@ bin/
 *.suo
 *.csproj.user
 *.nupkg
+/ConfigFile/project.lock.json
