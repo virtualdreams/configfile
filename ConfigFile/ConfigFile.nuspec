@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>ConfigFile</id>
-        <version>1.0.6</version>
+        <version>1.0.7</version>
         <title>ConfigFile</title>
         <authors>virtualdreams</authors>
         <owners>virtualdreams</owners>
@@ -27,7 +27,7 @@
         <file src="bin\Release\net45\ConfigFile.xml" target="lib\net45\ConfigFile.xml" />
         <file src="bin\Release\net451\ConfigFile.dll" target="lib\net451\ConfigFile.dll" />
         <file src="bin\Release\net451\ConfigFile.xml" target="lib\net451\ConfigFile.xml" />
-        <file src="bin\Release\netcoreapp1.0\ConfigFile.dll" target="lib\netstandard1.0\ConfigFile.dll" />
-        <file src="bin\Release\netcoreapp1.0\ConfigFile.xml" target="lib\netstandard1.0\ConfigFile.xml" />
+        <file src="bin\Release\netcoreapp1.0\ConfigFile.dll" target="lib\netcoreapp1.0\ConfigFile.dll" />
+        <file src="bin\Release\netcoreapp1.0\ConfigFile.xml" target="lib\netcoreapp1.0\ConfigFile.xml" />
     </files>
 </package>
