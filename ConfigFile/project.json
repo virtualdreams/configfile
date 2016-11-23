@@ -1,11 +1,16 @@
 {
-  "version": "1.0.0.0",
+  "version": "1.0.9",
   "copyright": "Copyright © stichelbiene.de 2016",
   "title": "ConfigFile",
   "description": "Text based configuration parser",
   "buildOptions": {
     "debugType": "portable",
-	"xmlDoc": true
+	"xmlDoc": true,
+	"compile": {
+      "exclude": [
+	    "Properties/AssemblyInfo.cs"
+      ]
+	}
   },
   "dependencies": {},
   "frameworks": {
