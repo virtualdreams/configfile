@@ -1,5 +1,5 @@
 {
-  "version": "1.0.9",
+  "version": "1.0.9-*",
   "copyright": "Copyright © stichelbiene.de 2016",
   "title": "ConfigFile",
   "description": "Text based configuration parser",
